@@ -1,0 +1,176 @@
+mixed-port: 13600
+allow-lan: false
+mode: Rule
+log-level: error
+external-controller: 127.0.0.1:19090
+dns:
+  enable: true
+  ipv6: false
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip # or redir-host
+  fake-ip-range: 198.18.0.1/16
+  use-hosts: true
+  fake-ip-filter:
+    - "*.lan"
+    - localhost.ptlogin2.qq.com
+  # nameserver-policy:
+  #   'www.baidu.com': '114.114.114.114'
+  #   '+.internal.crop.com': '10.0.0.1'
+  default-nameserver:
+    - 114.114.114.114
+    - 223.5.5.5
+    - 119.29.29.29
+    - 180.76.76.76
+    - 8.8.8.8
+  nameserver:
+    - 114.114.114.114
+    - 223.5.5.5
+    - 119.29.29.29
+    - 180.76.76.76
+    - 1.2.4.8
+    - tls://dns.rubyfish.cn:853
+    - https://1.1.1.1/dns-query
+    - dhcp://en0 # dns from dhcp
+  fallback: # concurrent request with nameserver,
+    # fallback used when GEOIP country isn't CN
+    - tcp://1.1.1.1
+    - tls://13800000000.rubyfish.cn:853
+    - tls://1.0.0.1:853
+    - tls://dns.google:853
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr: # ips in these subnets will be considered polluted
+      - 240.0.0.0/4
+    #domain:
+    # - '+.google.com'
+    # - '+.facebook.com'
+    # - '+.youtube.com'
+profile:
+  store-selected: false
+  store-fake-ip: true
+tun:
+  enable: true
+  stack: system
+  auto-route: true
+  auto-detect-interface: true
+  dns-hijack:
+    - 198.18.0.2:53
+proxy-providers:
+  nodes:
+    type: http
+    path: ./nodes.yaml
+    url: # 节点订阅地址，只需要返回节点列表
+    interval: 14400
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 300
+proxy-groups:
+  - name: 🔰 节点选择
+    type: select
+    use:
+      - nodes
+    proxies:
+      - ♻️ 自动选择
+  - name: ♻️ 自动选择
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 300
+    use:
+      - nodes
+    proxies:
+  - name: 🎯 全球直连
+    type: select
+    proxies:
+      - DIRECT
+      - 🔰 节点选择
+      - ♻️ 自动选择
+  - name: 🛑 全球拦截
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+  - name: 🐟 漏网之鱼
+    type: select
+    proxies:
+      - 🔰 节点选择
+      - ♻️ 自动选择
+      - DIRECT
+      - REJECT
+rule-providers:
+  LocalAreaNetwork:
+    type: http
+    behavior: classical
+    path: ./rulesets/LocalAreaNetwork.yaml
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/LocalAreaNetwork.yaml
+    interval: 14400
+  BanAD:
+    type: http
+    behavior: classical
+    path: ./rulesets/BanAD.yaml
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanAD.yaml
+    interval: 14400
+  BanProgramAD:
+    type: http
+    behavior: classical
+    path: ./rulesets/BanProgramAD.yaml
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanProgramAD.yaml
+    interval: 14400
+  ProxyLite:
+    type: http
+    behavior: classical
+    path: ./rulesets/ProxyLite.yaml
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyLite.yaml
+    interval: 14400
+  ProxyMedia:
+    type: http
+    behavior: classical
+    path: ./rulesets/ProxyMedia.yaml
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyMedia.yaml
+    interval: 14400
+  ProxyGFWlist:
+    type: http
+    behavior: classical
+    path: ./rulesets/ProxyGFWlist.yaml
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyGFWlist.yaml
+    interval: 14400
+  ChinaDomain:
+    type: http
+    behavior: classical
+    path: ./rulesets/ChinaDomain.yaml
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaDomain.yaml
+    interval: 14400
+  ChinaMedia:
+    type: http
+    behavior: classical
+    path: ./rulesets/ChinaMedia.yaml
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaMedia.yaml
+    interval: 14400
+  ChinaIp:
+    type: http
+    behavior: ipcidr
+    path: ./rulesets/ChinaIp.yaml
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaIp.yaml
+    interval: 14400
+  ChinaCompanyIp:
+    type: http
+    behavior: ipcidr
+    path: ./rulesets/ChinaCompanyIp.yaml
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaCompanyIp.yaml
+    interval: 14400
+rules:
+  - RULE-SET,LocalAreaNetwork,🎯 全球直连
+  - RULE-SET,ChinaDomain,🎯 全球直连
+  - RULE-SET,ChinaMedia,🎯 全球直连
+  - RULE-SET,ChinaIp,🎯 全球直连
+  - RULE-SET,ChinaCompanyIp,🎯 全球直连
+  - RULE-SET,BanAD,🛑 全球拦截
+  - RULE-SET,BanProgramAD,🛑 全球拦截
+  - RULE-SET,ProxyLite,🔰 节点选择
+  - RULE-SET,ProxyMedia,🔰 节点选择
+  - RULE-SET,ProxyGFWlist,🔰 节点选择
+  - MATCH,🐟 漏网之鱼
+
+  # GeoIP China
+  # - GEOIP,CN,🎯 全球直连
