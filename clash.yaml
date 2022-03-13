@@ -744,7 +744,6 @@ cfw-bypass:
   - "*.zhimg.com"
   - "*.zhongsou.com"
   - "*.zhuihd.com"
-  - "*.edu.cn"
   - "localhost"
   - 127.*
   - 10.*
