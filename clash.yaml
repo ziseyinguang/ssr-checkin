@@ -52,7 +52,7 @@ dns:
   enable: true
   ipv6: false
   listen: 0.0.0.0:53
-  enhanced-mode: fake-ip # or redir-host
+  enhanced-mode: redir-host # or fake-ip
   fake-ip-range: 198.18.0.1/16
   use-hosts: true
   fake-ip-filter:
@@ -744,6 +744,7 @@ cfw-bypass:
   - "*.zhimg.com"
   - "*.zhongsou.com"
   - "*.zhuihd.com"
+  - "*.edu.cn"
   - "localhost"
   - 127.*
   - 10.*
