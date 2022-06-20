@@ -2,10 +2,10 @@
     "retry": 5,
     "domains": [
         {
-            "domain": "",
+            "domain": "https://mojing666.com",
             "param": {
-                "email": "",
-                "passwd": ""
+                "email": "245589544@qq.com",
+                "passwd": "245589544"
             }
         },
         {
